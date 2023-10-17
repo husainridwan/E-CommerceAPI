@@ -1,4 +1,5 @@
 import Product from '../models/product.js';
+import Cart from '../models/cart.js';
 
 const shopController = {
   getProducts: (req, res, next) => {
@@ -41,6 +42,9 @@ const shopController = {
 
   postCart: (req, res, next) => {
     const prodId = req.body.productId;
+    Product.findById(prodId, product => {
+      Cart.addProduct(prodId, product.price);
+    })
     res.redirect('/cart');
   },
 
