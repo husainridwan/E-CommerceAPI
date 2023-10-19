@@ -2,12 +2,10 @@ import Product from '../models/product.js';
 
 const adminController = {
     getAddProduct: (req, res, next) => {
-        res.render('admin/add', {
+        res.render('admin/edit', {
           pageTitle: 'Add Product',
-          path: '/admin/add',
-          formsCSS: true,
-          productCSS: true,
-          activeAddProduct: true
+          path: '/admin/edit',
+          editing: false
         })
     },
     
@@ -21,6 +19,26 @@ const adminController = {
       product.save();
       res.redirect('/');
     }, 
+
+    getEditProduct: (req, res, next) => {
+      const editMode = req.query.editMode;
+      if (!editMode) {
+        return res.redirect('/');
+      }
+      const prodId = req.params.productId;
+      Product.findById(prodId, product => {
+        if (!product) {
+          return res.redirect('/');
+        }
+      
+        res.render('admin/edit', {
+          pageTitle: 'Edit Product',
+          path: '/admin/add',
+          editing: editMode,
+          product: product
+        })
+      })
+  },
 
     getProducts: (req, res, next) => {
         Product.fetchAll(products => {
