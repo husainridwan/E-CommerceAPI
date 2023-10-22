@@ -12,6 +12,13 @@ router.post('/add', adminController.postAddProduct);
 // /admin/products => GET
 router.get('/edit/:productId', adminController.getEditProduct);
 
+// /admin/products => POST
+router.post('/edit', adminController.postEditProduct);
+
+// /admin/delete => POST
+router.post('/delete', adminController.postDeleteProduct);
+
+// /admin/products => GET
 router.get('/products', adminController.getProducts);
 
 const adminRoutes = router;
