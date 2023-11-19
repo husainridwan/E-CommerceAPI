@@ -15,12 +15,16 @@ const adminController = {
       const price = req.body.price;
       const description = req.body.description;
       
-      const product = new Product(null, title, description, price, imageUrl);
-      product.save()
-        .then(() => {
-          res.redirect('/');
-        })
-        .catch(err => console.log(err));
+      Product.create({
+        title: title,
+        imageUrl: imageUrl,
+        price: price,
+        description: description
+      }).then(result => {
+        console.log('Created Product');
+      }).catch(err => {
+        console.log(err);
+      })
     }, 
 
     getEditProduct: (req, res, next) => {
@@ -29,18 +33,20 @@ const adminController = {
         return res.redirect('/');
       }
       const prodId = req.params.productId;
-      Product.findById(prodId, product => {
-        if (!product) {
-          return res.redirect('/');
-        }
-      
-        res.render('admin/edit', {
-          pageTitle: 'Edit Product',
-          path: '/admin/edit',
-          editing: editMode,
-          product: product
+      Product.findByPk(prodId)
+        .then(product => {
+          if (!product) {
+            return res.redirect('/');
+          }
+        
+          res.render('admin/edit', {
+            pageTitle: 'Edit Product',
+            path: '/admin/edit',
+            editing: editMode,
+            product: product
+          })
         })
-      })
+        .catch(err => console.log(err));
     },
 
     postEditProduct: (req, res, next) => {
@@ -50,43 +56,50 @@ const adminController = {
       const updatedPrice = req.body.price;
       const updatedDesc = req.body.description;
 
-      Product.findById(prodId, product => {
-        if (!product) {
-          return res.redirect('/admin/products');
-        }
-        product.title = updatedTitle;
-        product.imageUrl = updatedImageUrl; 
-        product.price = updatedPrice; 
-        product.description = updatedDesc;
+      Product.findByPk(prodId) 
+        .then(product => {
+          product.title = updatedTitle;
+          product.imageUrl = updatedImageUrl; 
+          product.price = updatedPrice; 
+          product.description = updatedDesc;
 
-        const updatedProduct = new Product(prodId, updatedTitle, updatedImageUrl, updatedPrice, updatedDesc);
-        return updatedProduct.save()
+          return product.save();
+          })
           .then(result => {
-            console.log('Updated Product!');
+            console.log('Updated Product');
             res.redirect('/admin/products');
           })
           .catch(err => {
             console.log(err);
-            res.redirect('/admin/products');
           });
-      });
     },
 
     postDeleteProduct: (req, res, next) => {
       const prodId = req.body.productId;
-      Product.deleteById(prodId);
-        res.redirect('/admin/products');
+      Product.findByPk(prodId)
+        .then(product => {
+          return product.destroy();
+        })
+        .then(result => {
+          console.log('Deleted Product');
+          res.redirect('/admin/products');
+        })
+        .catch(err => console.log(err));
     }, 
 
     getProducts: (req, res, next) => {
-        Product.fetchAll(products => {
+        Product.findAll()
+          .then(products => {
           res.render('admin/products', {
             prods: products,
             pageTitle: 'Admin Products',
             path: '/',
             });
-        });
-    }
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      }
 };
 
 export default adminController;

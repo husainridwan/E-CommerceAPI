@@ -5,7 +5,7 @@ import shopRoutes from "./routes/shop.js";
 import path from "path";
 import rootDir from "./util/path.js";
 import { getErrorPage } from "./controllers/error.js";
-import db from "./util/database.js";
+import sequelize from "./util/database.js";
 
 
 
@@ -13,13 +13,6 @@ const app = express();
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
-
-db.execute('SELECT * FROM products')
-  .then(result => {
-        console.log(result[0], result[1], result[2])})
-  .catch(err => {
-        console.log(err);
-    });
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(rootDir, 'public')));
@@ -31,6 +24,13 @@ app.use(getErrorPage);
 
 const port = 3000;
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}.`);
-})
+sequelize.sync()
+  .then(result => {
+        // console.log(result);
+        app.listen(port, () => {
+            console.log(`Server is running on port ${port}.`);
+        })
+    })
+  .catch(err => {
+        console.log(err);
+    });
